@@ -36,7 +36,7 @@ func (b *Broker) setupSerf(config *serf.Config, ch chan serf.Event, path string)
 	config.Tags["serf_lan_addr"] = fmt.Sprintf("%s:%d", b.config.SerfLANConfig.MemberlistConfig.BindAddr, b.config.SerfLANConfig.MemberlistConfig.BindPort)
 	config.Tags["broker_addr"] = b.config.Addr
 	config.EventCh = ch
-	config.EnableNameConflictResolution = false
+	config.EnableNameConflictResolution = true
 	if !b.config.DevMode {
 		config.SnapshotPath = filepath.Join(b.config.DataDir, path)
 	}
@@ -50,6 +50,7 @@ func (b *Broker) lanEventHandler() {
 	for {
 		select {
 		case e := <-b.eventChLAN:
+			fmt.Println(e)
 			switch e.EventType() {
 			case serf.EventMemberJoin:
 				b.lanNodeJoin(e.(serf.MemberEvent))
@@ -123,6 +124,7 @@ func (b *Broker) maybeBootstrap() {
 		log.Error.Printf("broker/%d: read last raft index error: %s", b.config.ID, err)
 		return
 	}
+	// if index > 1 {
 	if index != 0 {
 		log.Info.Printf("broker/%d: raft data found, disabling bootstrap mode: index: %d, path: %s", b.config.ID, index, filepath.Join(b.config.DataDir, raftState))
 		b.config.BootstrapExpect = 0

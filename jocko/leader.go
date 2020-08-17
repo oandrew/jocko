@@ -275,6 +275,9 @@ func (b *Broker) reconcileMember(m serf.Member) error {
 
 func (b *Broker) handleAliveMember(m serf.Member) error {
 	meta, ok := metadata.IsBroker(m)
+	if !ok {
+		return nil
+	}
 	if ok {
 		if err := b.joinCluster(m, meta); err != nil {
 			return err

@@ -119,6 +119,18 @@ func NewBroker(config *config.Config, tracer opentracing.Tracer) (*Broker, error
 
 	go b.logState()
 
+	go func() {
+		for {
+			if err := b.JoinLAN(config.StartJoinAddrsLAN...); err != protocol.ErrNone {
+				log.Error.Print(err)
+				time.Sleep(1 * time.Second)
+				continue
+			}
+			break
+
+		}
+	}()
+
 	return b, nil
 }
 
@@ -822,6 +834,7 @@ func (b *Broker) handleFetch(ctx *Context, r *protocol.FetchRequest) *protocol.F
 		for j, p := range topic.Partitions {
 			fpres := &protocol.FetchPartitionResponse{}
 			fpres.Partition = p.Partition
+			fpres.RecordSet = []byte{}
 			err := b.withTimeout(r.MaxWaitTime, func() protocol.Error {
 				replica, err := b.replicaLookup.Replica(topic.Topic, p.Partition)
 				if err != nil {
@@ -862,6 +875,8 @@ func (b *Broker) handleFetch(ctx *Context, r *protocol.FetchRequest) *protocol.F
 		}
 		fres.Responses[i] = fr
 	}
+
+	spew.Dump(fres)
 	return fres
 }
 
@@ -1379,7 +1394,7 @@ func (b *Broker) withTimeout(timeout time.Duration, fn func() protocol.Error) pr
 	}
 
 	c := make(chan protocol.Error, 1)
-	defer close(c)
+	//defer close(c)
 
 	timer := time.NewTimer(timeout)
 	defer timer.Stop()

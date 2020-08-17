@@ -49,6 +49,8 @@ func init() {
 	brokerCmd.Flags().StringSliceVar(&brokerCfg.StartJoinAddrsLAN, "join", nil, "Address of an broker serf to join at start time. Can be specified multiple times.")
 	brokerCmd.Flags().StringSliceVar(&brokerCfg.StartJoinAddrsWAN, "join-wan", nil, "Address of an broker serf to join -wan at start time. Can be specified multiple times.")
 	brokerCmd.Flags().Int32Var(&brokerCfg.ID, "id", 0, "Broker ID")
+	brokerCmd.Flags().StringVar(&brokerCfg.NodeName, "name", "", "Node Name")
+	// brokerCmd.Flags().IntVar(&brokerCfg.SerfLANConfig.MemberlistConfig.BindPort, "memberport", 8301, "Member list port")
 
 	topicCmd := &cobra.Command{Use: "topic", Short: "Manage topics"}
 	createTopicCmd := &cobra.Command{Use: "create", Short: "Create a topic", Run: createTopic, Args: cobra.NoArgs}
